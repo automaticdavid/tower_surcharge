@@ -23,7 +23,7 @@
   
     - name: Create Job Template for Banner
       tower_job_template:
-        name: Network Banner Configurations
+        name: Network-Banner
         inventory: Workshop Inventory
         project: Workshop Project
         job_type: run
