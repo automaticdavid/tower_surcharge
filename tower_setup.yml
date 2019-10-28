@@ -25,7 +25,7 @@
       shell: |
          tower-cli config host "{{ tower_hostname }}"
          tower-cli config verify_ssl false
-         tower-cli login --password {{ tower_username }} {{ tower_password }}
+         tower-cli login {{ tower_username }} --password {{ tower_password }}
          tower-cli job_template associate_credential --job-template "Backup Network Configurations" --credential "Tower Crendential"
 
 
