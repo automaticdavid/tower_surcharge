@@ -11,6 +11,7 @@
     - name: Create Job Template for Backup
       tower_job_template:
         name: Backup Network Configurations
+        organization: REDHAT NETWORK ORGANIZATION 
         inventory: Workshop Inventory
         project: Workshop Project
         job_type: run
@@ -24,10 +25,42 @@
     - name: Create Job Template for Banner
       tower_job_template:
         name: Network-Banner
+        organization: REDHAT NETWORK ORGANIZATION 
         inventory: Workshop Inventory
         project: Workshop Project
         job_type: run
         playbook: network_banner.yml
+        credential: Workshop Credential
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+  
+    - name: Add Tower Project
+      tower_project:
+        name: Git Backup
+        organization: REDHAT NETWORK ORGANIZATION 
+        scm_type: git
+        scm_url: https://github.com/automaticdavid/git_backup.git
+        scm_branch: master
+        scm_delete_on_update: yes
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+        
+    - name: Wait for project sync
+      pause: 
+        seconds: 90 
+
+    - name: Create Job Template for Git Backup
+      tower_job_template:
+        name: Git Backup
+        organization: REDHAT NETWORK ORGANIZATION 
+        inventory: Workshop Inventory
+        project: Git Backup
+        job_type: run
+        playbook: backup_to_git.yml
         credential: Workshop Credential
         tower_username: "{{ tower_username }}"
         tower_password: "{{ tower_password }}"
@@ -40,6 +73,7 @@
          tower-cli config verify_ssl false
          tower-cli login {{ tower_username }} --password {{ tower_password }}
          tower-cli job_template associate_credential --job-template "Backup Network Configurations" --credential "Tower Credential"
+        # tower-cli job_template associate_credential --job-template "Git Backup" --credential "Git Credential"
 
 
     # - name: Create Job Template for Lab Setup
