@@ -1,0 +1,180 @@
+---
+- name: Setup Demo in Tower
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars_files: lab-credentials.secret.yml
+
+  tasks:
+
+    - name: Create tower organization
+      tower_organization:
+        name: meteor
+        description: "Only the Meteors"
+        state: present
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+
+    - name: Create AWS Credentials
+      tower_credential:
+        name: aws
+        organization: meteor
+        kind: aws
+        username: "{{ aws_access_key }}"
+        password: "{{ aws_secret_key }}"
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
+    - name: Create ec2 Machine Credentials
+      tower_credential:
+        name: aws_ssh
+        organization: meteor
+        kind: ssh
+        ssh_key_data: "{{ lookup('file', ec2_machine_private_key_path) }}"
+        username: "{{ ec2_machine_username }}"
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
+    - name: Create Inventory
+      tower_inventory:
+        name: aws_private
+        organization: meteor
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
+    - name: Create Inventory Source
+      tower_inventory_source:
+        name: aws_private
+        inventory: aws_private
+        credential: aws
+        source: ec2
+        source_vars: 
+          vpc_destination_variable: private_ip_address
+        update_on_launch: yes
+        overwrite: yes
+        overwrite_vars: yes
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
+    - name: Add Tower Project
+      tower_project:
+          name: ML Cat - AWS (prod)
+          description: Is it Cat ?
+          organization: meteor
+          scm_type: git
+          scm_url: https://github.com/automaticdavid/demo_cat_ec2.git
+          scm_branch: master
+          scm_delete_on_update: yes
+          tower_username: "{{ tower_username }}"
+          tower_password: "{{ tower_password }}"
+          tower_host: "{{ tower_hostname }}"
+          state: present
+      
+    - name: Wait for project sync
+      pause: 
+        seconds: 90 
+  
+    - name: Create Job Template for Provisioning
+      tower_job_template:
+        name: 'ML Cat - AWS (prod) - Provision'
+        inventory: aws_private
+        project: ML Cat - AWS (prod)
+        job_type: run
+        playbook: stack.yml
+        credential: aws_ssh
+        extra_vars_path: extra_vars.provision.yml
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+  
+    - name: Create Job Template for Lab Setup
+      tower_job_template:
+        name: 'ML Cat - AWS (prod) - Lab Setup'
+        inventory: aws_private
+        project: ML Cat - AWS (prod)
+        job_type: run
+        playbook: lab_setup.yml
+        credential: aws_ssh
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
+    - name: Create Job Template for Lab Teardown
+      tower_job_template:
+        name: 'ML Cat - AWS (prod) - Teardown'
+        inventory: aws_private
+        project: ML Cat - AWS (prod)
+        job_type: run
+        playbook: lab_delete.yml
+        credential: aws_ssh
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
+    - name: Create temporary file for ssh_user credential input data
+      tempfile:
+        state: file
+        suffix: temp
+      register: ssh_user_inputs
+
+    - name: Template ssh_user credential input data
+      template:
+        src: ssh_user.j2
+        dest: "{{ ssh_user_inputs.path }}"
+      vars:
+        ssh_key: "{{ lookup('file', ssh_public_key_path) }}"
+
+    - name: Create temporary file for rhsm credential input data
+      tempfile:
+        state: file
+        suffix: temp
+      register: rhsm_inputs
+    
+    - name: Template rhsm credential input data
+      template:
+        src: rhsm.j2
+        dest: "{{ rhsm_inputs.path }}"
+
+    - name: Additional Tower Settings
+      shell: |
+        tower-cli config host "{{ tower_hostname }}"
+        tower-cli config verify_ssl false
+        tower-cli login --password {{ tower_username }} {{ tower_password }}
+        tower-cli job_template associate_credential --job-template "ML Cat - AWS (prod) - Provision" --credential "aws"
+        tower-cli job_template associate_credential --job-template "ML Cat - AWS (prod) - Lab Setup" --credential "aws"
+        tower-cli job_template associate_credential --job-template "ML Cat - AWS (prod) - Teardown" --credential "aws"
+        tower-cli job_template associate_ig --job_template "ML Cat - AWS (prod) - Provision" --instance_group "aws"
+        tower-cli credential_type create -n ssh_user --kind cloud --inputs @ssh_user.inputs.yml --injectors @ssh_user.injectors.yml
+        tower-cli credential_type create -n rhsm --kind cloud --inputs @rhsm.inputs.yml --injectors @rhsm.injectors.yml
+        tower-cli credential create -n ec2_user --credential-type 'ssh_user' --organization meteor --inputs @"{{ ssh_user_inputs.path }}"
+        tower-cli credential create -n rhsm --credential-type 'rhsm' --organization meteor --inputs @"{{ rhsm_inputs.path }}"
+        tower-cli job_template associate_credential --job-template "ML Cat - AWS (prod) - Provision" --credential "ec2_user"
+        tower-cli job_template associate_credential --job-template "ML Cat - AWS (prod) - Provision" --credential "rhsm"
+
+    - name: Remove temporary setup files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ rhsm_inputs.path }}"
+        - "{{ ssh_user_inputs.path }}"
+
+
+
+
+
+
+    
