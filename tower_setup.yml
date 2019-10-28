@@ -21,6 +21,19 @@
         tower_host: "{{ tower_hostname }}"
         state: present
   
+    - name: Create Job Template for Banner
+      tower_job_template:
+        name: Backup Network Configurations
+        inventory: Workshop Inventory
+        project: Workshop Project
+        job_type: run
+        playbook: network_banner.yml
+        credential: Workshop Credential
+        tower_username: "{{ tower_username }}"
+        tower_password: "{{ tower_password }}"
+        tower_host: "{{ tower_hostname }}"
+        state: present
+
     - name: Additional Tower Settings
       shell: |
          tower-cli config host "{{ tower_hostname }}"
