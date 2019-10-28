@@ -21,6 +21,14 @@
         tower_host: "{{ tower_hostname }}"
         state: present
   
+    - name: Additional Tower Settings
+      shell: |
+         tower-cli config host "{{ tower_hostname }}"
+         tower-cli config verify_ssl false
+         tower-cli login --password {{ tower_username }} {{ tower_password }}
+         tower-cli job_template associate_credential --job-template "Backup Network Configurations" --credential "Tower Crendential"
+
+
     # - name: Create Job Template for Lab Setup
     #   tower_job_template:
     #     name: 'ML Cat - AWS (prod) - Lab Setup'
