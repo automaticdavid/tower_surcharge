@@ -17,22 +17,61 @@
     tower_host: "{{ tower_hostname }}"
     state: present
 
-- name: Create Inventory Source
-  tower_inventory_source:
-    name: Workshop Inventory Soruce
+- name: Add Hosts
+  tower_host:
+    name: "{{ item }}"
+    description: "Cisco {{ item }}"
     inventory: Workshop Inventory
-    source: file
-    source_path: /home/student1/networking-workshop/lab_inventory/hosts
-    update_on_launch: no
-    overwrite: yes
-    overwrite_vars: yes
+    state: present
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
+    variables:
+      ansible_user: ec2-user
+      ansible_network_os: ios
+      ansible_connection: network_cli
+      private_ip: "{{ lookup('file', '/home/student1/networking-workshop/lab_inventory/hosts') 
+                       | regex_search('^' + item +'.*$', multiline=True) 
+                       |  regex_search('(private_ip=.*$)') 
+                       | replace('private_ip=','') }}"
+  with_items:
+    - rtr1
+    - rtr2
+    - rtr3
+    - rtr4
+
+- name: Add tower group
+  tower_group:
+    name: dc1
+    description: "Datacenter 1"
+    inventory: "Workshop Inventory"
     state: present
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
 
-    # - name: Create project
+- name: Add tower group
+  tower_group:
+    name: dc2
+    description: "Datacenter 2"
+    inventory: "Workshop Inventory"
+    state: present
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
 
-    # - name: 
+- name: Associate hosts to DC
+  shell: |
+       tower-cli config host "{{ tower_hostname }}"
+       tower-cli config verify_ssl false
+       tower-cli login {{ tower_username }} --password {{ tower_password }}
+       tower-cli host associate --host rtr1  --group dc1
+       tower-cli host associate --host rtr2  --group dc1
+       tower-cli host associate --host rtr3  --group dc2
+       tower-cli host associate --host rtr4  --group dc2
 
-  
+
+
+
+
+

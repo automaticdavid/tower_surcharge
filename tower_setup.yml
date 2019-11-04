@@ -9,7 +9,7 @@
   tasks:
 
     - name: More surcharge if using labs intead of RHPDS
-      import_tasks: labs.yaml
+      import_tasks: labs.yml
       when: labs
 
     - name: Create Job Template for Backup
