@@ -78,7 +78,6 @@
     # ssh_key_data: "{{ lookup('file', '/home/student1/.ssh/aws-private.pem') }}"
     # https://github.com/ansible/ansible/issues/47832
     ssh_key_data: '/home/student1/.ssh/aws-private.pem'
-    host: {}
     username: ec2-user
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
@@ -90,9 +89,9 @@
     name: Tower Credential
     organization: REDHAT NETWORK ORGANIZATION
     kind: tower
-    host: {}
     username: "{{ tower_username }}"
     password: "{{ tower_password }}"
+    host: "{{ tower_hostname }}"
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"

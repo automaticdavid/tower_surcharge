@@ -24,6 +24,18 @@
         tower_password: "{{ tower_password }}"
         tower_host: "{{ tower_hostname }}"
         state: present
+
+    - name: Create temporary file for extra var definition
+      tempfile:
+        state: file
+        suffix: temp
+      register: r_extra_vars
+
+    - name: Write extra var definition   
+      copy:
+        content: "net_banner: WELCOME TO AUTOMATION"
+        dest: "{{ r_extra_vars.path }}"
+      delegate_to: localhost
   
     - name: Create Job Template for Banner
       tower_job_template:
@@ -33,6 +45,7 @@
         job_type: run
         playbook: network_banner.yml
         credential: Workshop Credential
+        extra_vars_path: "{{ r_extra_vars.path }}"
         tower_username: "{{ tower_username }}"
         tower_password: "{{ tower_password }}"
         tower_host: "{{ tower_hostname }}"
@@ -76,6 +89,13 @@
          tower-cli job_template associate_credential --job-template "Backup Network Configurations" --credential "Tower Credential"
         # tower-cli job_template associate_credential --job-template "Git Backup" --credential "Git Credential"
 
+
+    - name: Remove temporary setup files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ r_extra_vars.path }}"
 
 
 
