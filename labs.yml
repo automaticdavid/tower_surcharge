@@ -78,12 +78,66 @@
     # ssh_key_data: "{{ lookup('file', '/home/student1/.ssh/aws-private.pem') }}"
     # https://github.com/ansible/ansible/issues/47832
     ssh_key_data: '/home/student1/.ssh/aws-private.pem'
+    host: {}
     username: ec2-user
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
     state: present
 
+- name: Create Tower Credentials
+  tower_credential:
+    name: Tower Credential
+    organization: REDHAT NETWORK ORGANIZATION
+    kind: tower
+    host: {}
+    username: "{{ tower_username }}"
+    password: "{{ tower_password }}"
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
 
+- name: Add Tower Project
+  tower_project:
+    name: Workshop Project 
+    organization: REDHAT NETWORK ORGANIZATION 
+    scm_type: git
+    scm_url: https://github.com/automaticdavid/tower_workshop.git
+    scm_branch: master
+    scm_delete_on_update: yes
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
 
+- name: Wait for sync
+  pause: 
+    seconds: 90 
+
+- name: Create Job Template for User
+  tower_job_template:
+    name: Network-User
+    inventory: Workshop Inventory
+    project: Workshop Project
+    job_type: run
+    playbook: network_user.yml
+    credential: Workshop Credential
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
+
+- name: Create Job Template for Commands
+  tower_job_template:
+    name: Network-Commands
+    inventory: Workshop Inventory
+    project: Workshop Project
+    job_type: run
+    playbook: network_commands.yml
+    credential: Workshop Credential
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
 
