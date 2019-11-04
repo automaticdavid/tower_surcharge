@@ -40,6 +40,19 @@
     - rtr3
     - rtr4
 
+- name: Add ansible Host
+  tower_host:
+    name: ansible
+    description: Ansible Tower Control Node
+    inventory: Workshop Inventory
+    state: present
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    variables:
+      ansible_user: ec2-user
+      private_ip: 127.0.0.1
+
 - name: Add tower group
   tower_group:
     name: dc1
@@ -60,7 +73,17 @@
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
 
-- name: Associate hosts to DC
+- name: Add tower group
+  tower_group:
+    name: cisco
+    description: "All Cisco"
+    inventory: "Workshop Inventory"
+    state: present
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+
+- name: Associate hosts to DC and Cisco
   shell: |
        tower-cli config host "{{ tower_hostname }}"
        tower-cli config verify_ssl false
@@ -69,6 +92,10 @@
        tower-cli host associate --host rtr2  --group dc1
        tower-cli host associate --host rtr3  --group dc2
        tower-cli host associate --host rtr4  --group dc2
+       tower-cli host associate --host rtr1  --group cisco
+       tower-cli host associate --host rtr2  --group cisco
+       tower-cli host associate --host rtr3  --group cisco
+       tower-cli host associate --host rtr4  --group cisco
 
 - name: Create Workshop Machine Credentials
   tower_credential:
@@ -114,6 +141,18 @@
   pause: 
     seconds: 90 
 
+- name: Create temporary file for extra var definition
+  tempfile:
+    state: file
+    suffix: temp
+  register: r_extra_vars
+
+- name: Write extra var definition   
+  copy:
+    content: "network_name: automator"
+    dest: "{{ r_extra_vars.path }}"
+  delegate_to: localhost
+
 - name: Create Job Template for User
   tower_job_template:
     name: Network-User
@@ -122,6 +161,8 @@
     job_type: run
     playbook: network_user.yml
     credential: Workshop Credential
+    extra_vars_path: "{{ r_extra_vars.path }}"   
+    limit: cisco
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
@@ -135,8 +176,18 @@
     job_type: run
     playbook: network_commands.yml
     credential: Workshop Credential
+    limit: cisco
+    survey_enabled: yes
+    survey_spec: "{{ lookup('file', 'cmd.spec.yml') }}"
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
     state: present
+
+- name: Remove temporary setup files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ r_extra_vars.path }}"
 

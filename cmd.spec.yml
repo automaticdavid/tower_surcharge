@@ -1,0 +1,19 @@
+{
+  "name": "", 
+  "description": "", 
+  "spec": [
+    {
+      "question_name": "Select the command you want to run", 
+      "question_description": "", 
+      "required": true, 
+      "type": "multiplechoice", 
+      "variable": "tower_input", 
+      "min": null, 
+      "max": null, 
+      "default": "show interfaces summary", 
+      "choices": "show interfaces summary\nshow ip route\nshow ip interface\nshow vlans", 
+      "new_question": true
+    }
+  ]
+}
+
