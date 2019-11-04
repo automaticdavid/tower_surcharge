@@ -8,6 +8,10 @@
 
   tasks:
 
+    - name: More surcharge if using labs intead of RHPDS
+      import_playbook: labs.yaml
+      when: labs
+
     - name: Create Job Template for Backup
       tower_job_template:
         name: Backup Network Configurations
