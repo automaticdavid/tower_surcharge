@@ -70,7 +70,19 @@
        tower-cli host associate --host rtr3  --group dc2
        tower-cli host associate --host rtr4  --group dc2
 
-
+- name: Create Workshop Machine Credentials
+  tower_credential:
+    name: Workshop Credential
+    organization: REDHAT NETWORK ORGANIZATION
+    kind: ssh
+    # ssh_key_data: "{{ lookup('file', '/home/student1/.ssh/aws-private.pem') }}"
+    # https://github.com/ansible/ansible/issues/47832
+    ssh_key_data: '/home/student1/.ssh/aws-private.pem'
+    username: ec2-user
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
 
 
 
