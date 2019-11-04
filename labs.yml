@@ -1,45 +1,35 @@
 ---
-- name: Setup Demo in Tower
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  become: yes
+- name: Create Org
+  tower_organization:
+    name: REDHAT NETWORK ORGANIZATION 
+    description: REDHAT NETWORK ORGANIZATION 
+    state: present
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
 
-  vars_files: lab-credentials.secret.yml
+- name: Create inventory
+  tower_inventory:
+    name: Workshop Inventory
+    organization: REDHAT NETWORK ORGANIZATION 
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
 
-  tasks:
-
-    - name: Create Org
-      tower_organization:
-        name: REDHAT NETWORK ORGANIZATION 
-        description: REDHAT NETWORK ORGANIZATION 
-        state: present
-        tower_username: "{{ tower_username }}"
-        tower_password: "{{ tower_password }}"
-        tower_host: "{{ tower_hostname }}"
-
-    - name: Create inventory
-      tower_inventory:
-        name: Workshop Inventory
-        organization: REDHAT NETWORK ORGANIZATION 
-        tower_username: "{{ tower_username }}"
-        tower_password: "{{ tower_password }}"
-        tower_host: "{{ tower_hostname }}"
-        state: present
-
-    - name: Create Inventory Source
-      tower_inventory_source:
-        name: Workshop Inventory Soruce
-        inventory: Workshop Inventory
-        source: file
-        source_path: /home/student1/networking-workshop/lab_inventory/hosts
-        update_on_launch: no
-        overwrite: yes
-        overwrite_vars: yes
-        tower_username: "{{ tower_username }}"
-        tower_password: "{{ tower_password }}"
-        tower_host: "{{ tower_hostname }}"
-        state: present
+- name: Create Inventory Source
+  tower_inventory_source:
+    name: Workshop Inventory Soruce
+    inventory: Workshop Inventory
+    source: file
+    source_path: /home/student1/networking-workshop/lab_inventory/hosts
+    update_on_launch: no
+    overwrite: yes
+    overwrite_vars: yes
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+    state: present
 
     # - name: Create project
 
