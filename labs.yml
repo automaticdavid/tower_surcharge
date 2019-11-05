@@ -114,14 +114,15 @@
   pause: 
     seconds: 90 
 
-- name: Create Job Template for User
+- name: Create Job Template for System
   tower_job_template:
-    name: Network-User
+    name: Network-System
     inventory: Workshop Inventory
     project: Workshop Project
     job_type: run
-    playbook: network_user.yml
+    playbook: network_system.yml
     credential: Workshop Credential
+    limit: cisco
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
@@ -135,6 +136,7 @@
     job_type: run
     playbook: network_commands.yml
     credential: Workshop Credential
+    limit: cisco
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"

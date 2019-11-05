@@ -45,7 +45,9 @@
         job_type: run
         playbook: network_banner.yml
         credential: Workshop Credential
+        limit: cisco
         extra_vars_path: "{{ r_extra_vars.path }}"
+        ask_extra_vars: yes
         tower_username: "{{ tower_username }}"
         tower_password: "{{ tower_password }}"
         tower_host: "{{ tower_hostname }}"
@@ -76,6 +78,7 @@
         job_type: run
         playbook: backup_to_git.yml
         credential: Workshop Credential
+        limit: cisco
         tower_username: "{{ tower_username }}"
         tower_password: "{{ tower_password }}"
         tower_host: "{{ tower_hostname }}"
