@@ -141,6 +141,22 @@
   pause: 
     seconds: 90 
 
+- name: Create temporary file for extra var definition
+  tempfile:
+    state: file
+    suffix: temp
+  register: r_extra_vars
+
+- name: Write extra var definition   
+  copy:
+    content: "---\nnetwork_domain_name:\n
+        network_domain_search:\n
+        network_hostname:\n
+        network_lookup_source:\n
+        network_name_servers:\n"
+    dest: "{{ r_extra_vars.path }}"
+  delegate_to: localhost
+
 - name: Create Job Template for System
   tower_job_template:
     name: Network-System
@@ -150,6 +166,9 @@
     playbook: network_system.yml
     credential: Workshop Credential
     limit: "{{ rhpds_limit }}"
+    ask_extra_vars: yes
+    ask_limit: yes
+    extra_vars_path: "{{ r_extra_vars.path }}"
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
@@ -171,3 +190,9 @@
     tower_host: "{{ tower_hostname }}"
     state: present
 
+- name: Remove temporary setup files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ r_extra_vars.path }}"
