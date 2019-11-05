@@ -10,8 +10,8 @@
       "variable": "tower_input", 
       "min": null, 
       "max": null, 
-      "default": "show interfaces summary", 
-      "choices": "show interfaces summary\nshow ip route\nshow ip interface\nshow vlans", 
+      "default": "show ip interface brief", 
+      "choices": "show ip interface brief\nshow interface description\nshow ip route", 
       "new_question": true
     }
   ]
