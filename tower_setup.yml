@@ -6,6 +6,9 @@
 
   vars_files: lab-credentials.secret.yml
 
+  vars:
+    rhpds_limit: cisco
+
   tasks:
 
     - name: More surcharge if using labs intead of RHPDS
@@ -45,7 +48,11 @@
         job_type: run
         playbook: network_banner.yml
         credential: Workshop Credential
+<<<<<<< HEAD
         limit: cisco
+=======
+        limit: "{{ rhpds_limit }}"
+>>>>>>> 6caa6b18c48dccf9c86065e4800792cbb7c6045d
         extra_vars_path: "{{ r_extra_vars.path }}"
         ask_extra_vars: yes
         tower_username: "{{ tower_username }}"
