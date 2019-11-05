@@ -23,6 +23,7 @@
         job_type: run
         playbook: network_backup.yml
         credential: Workshop Credential
+        limit: "{{ rhpds_limit }}"
         tower_username: "{{ tower_username }}"
         tower_password: "{{ tower_password }}"
         tower_host: "{{ tower_hostname }}"
@@ -48,11 +49,7 @@
         job_type: run
         playbook: network_banner.yml
         credential: Workshop Credential
-<<<<<<< HEAD
-        limit: cisco
-=======
         limit: "{{ rhpds_limit }}"
->>>>>>> 6caa6b18c48dccf9c86065e4800792cbb7c6045d
         extra_vars_path: "{{ r_extra_vars.path }}"
         ask_extra_vars: yes
         tower_username: "{{ tower_username }}"

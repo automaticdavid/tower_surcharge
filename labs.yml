@@ -141,19 +141,7 @@
   pause: 
     seconds: 90 
 
-- name: Create temporary file for extra var definition
-  tempfile:
-    state: file
-    suffix: temp
-  register: r_extra_vars
-
-- name: Write extra var definition   
-  copy:
-    content: "network_name: automator"
-    dest: "{{ r_extra_vars.path }}"
-  delegate_to: localhost
-
-- name: Create Job Template for User
+- name: Create Job Template for System
   tower_job_template:
     name: Network-System
     inventory: Workshop Inventory
@@ -161,7 +149,7 @@
     job_type: run
     playbook: network_system.yml
     credential: Workshop Credential
-    limit: cisco
+    limit: "{{ rhpds_limit }}"
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
@@ -175,16 +163,9 @@
     job_type: run
     playbook: network_commands.yml
     credential: Workshop Credential
-    limit: cisco
+    limit: "{{ rhpds_limit }}"
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
     state: present
-
-- name: Remove temporary setup files
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - "{{ r_extra_vars.path }}"
 
