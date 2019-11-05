@@ -110,7 +110,7 @@
        tower-cli host associate --host rtr2  --group routers
        tower-cli host associate --host rtr3  --group routers
        tower-cli host associate --host rtr4  --group routers
-`
+
 - name: Create Workshop Machine Credentials
   tower_credential:
     name: Workshop Credential
