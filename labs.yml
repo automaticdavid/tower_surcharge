@@ -83,6 +83,16 @@
     tower_password: "{{ tower_password }}"
     tower_host: "{{ tower_hostname }}"
 
+- name: Add tower group
+  tower_group:
+    name: routers
+    description: "All Cisco"
+    inventory: "Workshop Inventory"
+    state: present
+    tower_username: "{{ tower_username }}"
+    tower_password: "{{ tower_password }}"
+    tower_host: "{{ tower_hostname }}"
+
 - name: Associate hosts to DC and Cisco
   shell: |
        tower-cli config host "{{ tower_hostname }}"
@@ -96,7 +106,11 @@
        tower-cli host associate --host rtr2  --group cisco
        tower-cli host associate --host rtr3  --group cisco
        tower-cli host associate --host rtr4  --group cisco
-
+       tower-cli host associate --host rtr1  --group routers
+       tower-cli host associate --host rtr2  --group routers
+       tower-cli host associate --host rtr3  --group routers
+       tower-cli host associate --host rtr4  --group routers
+`
 - name: Create Workshop Machine Credentials
   tower_credential:
     name: Workshop Credential
@@ -149,11 +163,12 @@
 
 - name: Write extra var definition   
   copy:
-    content: "---\nnetwork_domain_name:\n
-        network_domain_search:\n
-        network_hostname:\n
-        network_lookup_source:\n
-        network_name_servers:\n"
+    content: "---\n
+      network_domain_name:\n
+      network_domain_search:\n
+      network_hostname:\n
+      network_lookup_source:\n
+      network_name_servers:\n"
     dest: "{{ r_extra_vars.path }}"
   delegate_to: localhost
 
