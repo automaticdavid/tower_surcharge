@@ -164,11 +164,11 @@
 - name: Write extra var definition   
   copy:
     content: "---\n
-      network_domain_name:\n
-      network_domain_search:\n
-      network_hostname:\n
-      network_lookup_source:\n
-      network_name_servers:\n"
+      network_domain_name: null\n
+      network_domain_search: null\n
+      network_hostname: null\n
+      network_lookup_source: null\n
+      network_name_servers: null\n\n"
     dest: "{{ r_extra_vars.path }}"
   delegate_to: localhost
 
