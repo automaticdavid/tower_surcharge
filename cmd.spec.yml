@@ -11,7 +11,7 @@
       "min": null, 
       "max": null, 
       "default": "show ip interface brief", 
-      "choices": "show ip interface brief\nshow interface description\nshow ip route\nshow ip name-servers", 
+      "choices": "show ip interface brief\nshow interface description\nshow ip route\nshow run | i name-server", 
       "new_question": true
     }
   ]
