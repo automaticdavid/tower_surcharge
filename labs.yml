@@ -163,6 +163,8 @@
     job_type: run
     playbook: network_commands.yml
     credential: Workshop Credential
+    survey_enabled: yes
+    survey_spec: "{{ lookup('file', 'cmd.spec.yml') }}"
     limit: "{{ rhpds_limit }}"
     tower_username: "{{ tower_username }}"
     tower_password: "{{ tower_password }}"
